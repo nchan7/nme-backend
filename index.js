@@ -109,7 +109,7 @@ app.get('/flights/:id', (req, res) => {
 // flight delete
 app.delete("/flights/:id", (req, res) => {
     Flight.findOneAndRemove({_id: req.params.id}, function(err) {
-        Airline.flights.update({name: req.body.name}, {$pull: {flights: {_id: req.params.id}}}, function (err, airline) {
+        Airline.update({name: req.body.name}, {$pull: {flights: req.params.id}}, function (err, airline) {
             if (err) res.json(err)
             res.json({message: "DELETED!"})
         })
