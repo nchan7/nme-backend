@@ -15,23 +15,25 @@ app.post('/airlines', (req, res) => {
         name: req.body.name,
         destinations: req.body.destinations,
         fleetsize: req.body.fleetsize, 
-        flights: [req.body.flight1, req.body.flight2,req.body.flight3] 
     }, function(err, airline) {
         res.json(airline)
     })
 })
 
-// app.post('/airlines/:id', (req, res) => {
-//     Airline.findById(req.params.id, function(err, airline) {
-//         Flight.findById(req.body.id, function(err, flight) {
-//             airline.flights.push(flight); // can be explicit and push product._id
-//             airline.save (function(err) {
-//                 if (err) res.json(err)
-//                 res.json(order)
-//             })
-//         })
-//     })
-// })
+app.post('/airlines/:id', (req, res) => {
+    Airline.findById(req.params.id, function(err, airline) {
+        Flight.create({origin: req.body.origin,
+                        destination: req.body.destination,
+                        price: req.body.price}, 
+        function(err, flight) { // try this with .create()
+            airline.flights.push(flight); // can be explicit and push product._id
+            airline.save (function(err) {
+                if (err) res.json(err)
+                res.json(airline)
+            })
+        })
+    })
+})
 
 // airline read all 
 app.get('/airlines', (req, res) => {
