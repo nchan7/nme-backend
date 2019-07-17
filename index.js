@@ -10,18 +10,31 @@ app.use(express.urlencoded({extended: false}));
 mongoose.connect('mongodb://localhost/nme-backend');
 
 // airline create
-app.post('/airline', (req, res) => {
+app.post('/airlines', (req, res) => {
     Airline.create({
-        name: "Southwest",
-        destinations: 101,
-        fleetSize: 754   
+        name: req.body.name,
+        destinations: req.body.destinations,
+        fleetsize: req.body.fleetsize, 
+        flights: [req.body.flight1, req.body.flight2,req.body.flight3] 
     }, function(err, airline) {
         res.json(airline)
     })
 })
 
+// app.post('/airlines/:id', (req, res) => {
+//     Airline.findById(req.params.id, function(err, airline) {
+//         Flight.findById(req.body.id, function(err, flight) {
+//             airline.flights.push(flight); // can be explicit and push product._id
+//             airline.save (function(err) {
+//                 if (err) res.json(err)
+//                 res.json(order)
+//             })
+//         })
+//     })
+// })
+
 // airline read all 
-app.get('/airline', (req, res) => {
+app.get('/airlines', (req, res) => {
     Airline.find({}, function(err, airlines) {
         if (err) res.json(err)
         res.json(airlines)
@@ -30,7 +43,7 @@ app.get('/airline', (req, res) => {
 
 
 // airline read one
-app.get('/airline/:id', (req, res) => {
+app.get('/airlines/:id', (req, res) => {
     Airline.findById(req.params.id, function (err, airline) {
         if (err) res.json(err)
         res.json(airline)
@@ -39,12 +52,10 @@ app.get('/airline/:id', (req, res) => {
 
 
 // airline update
-app.put("/airline/:id", (req, res) => {
-    Airline.findOneAndUpdate({name: "Southwest"}, 
+app.put("/airlines/:id", (req, res) => {
+    Airline.findOneAndUpdate({_id: req.params.id}, 
         {$set: 
-            {meta: 
-                    {age: 44, website: "ga.com" }
-            }
+            {destinations: req.body.destinations, fleetsize: req.body.fleetsize}
         }, {new: true}, function(err, airline) {
         if (err) res.json(err)
         res.json(airline)
@@ -54,8 +65,8 @@ app.put("/airline/:id", (req, res) => {
 
 
 // airline delete
-app.delete("/airline", (req, res) => {
-    Airline.findOneAndRemove({name: "Alaska"}, function(err) {
+app.delete("/airlines/:id", (req, res) => {
+    Airline.findOneAndRemove({_id: req.params.id}, function(err) {
         if (err) res.json(err)
         res.json({message: "DELETED!"})
     })
@@ -64,21 +75,28 @@ app.delete("/airline", (req, res) => {
 
 
 // flight create
-app.post('/flight', (req, res) => {
+app.post('/flights', (req, res) => {
     Flight.create({
-        origin: "Seattle",
-        destination: "Oakland",
-        price: 300
+        origin: req.body.origin,
+        destination: req.body.destination,
+        price: req.body.price
     }, function(err, airline) {
         res.json(airline)
     })
 })
 
+// flight read one
+app.get('/flights', (req, res) => {
+    Flight.find({}, function (err, flight) {
+        if (err) res.json(err)
+        res.json(flight)
+    })
+})
 
 
 // flight read one
-app.get('/flight/:id', (req, res) => {
-    Flight.findById(req.params.id, function (err, flight) {
+app.get('/flights/:id', (req, res) => {
+    Flight.findById({_id: req.params.id}, function (err, flight) {
         if (err) res.json(err)
         res.json(flight)
     })
@@ -87,15 +105,22 @@ app.get('/flight/:id', (req, res) => {
 
 
 // flight delete
-app.delete("/airline", (req, res) => {
-    Flight.findOneAndRemove({origin: "Seattle"}, function(err) {
-        if (err) res.json(err)
-        res.json({message: "DELETED!"})
-    })
+app.delete("/flights/:id", (req, res) => {
+    Flight.findOneAndRemove({_id: req.params.id}, function(err) {
+        Airline.flights.update({name: req.body.name}, {$pull: {flights: {_id: req.params.id}}}, function (err, airline) {
+            if (err) res.json(err)
+            res.json({message: "DELETED!"})
+        })
+})
 })
 
 
 
+// app.delete("/flights/:id", (req, res) => {
+    // Remove from parent and then remove from child
+    // })
+
+// }) 
 
 
 
@@ -104,6 +129,11 @@ app.delete("/airline", (req, res) => {
 
 
 
-app.listen(3000, () => {
-    console.log("Hunting cobras on 3000 🦊🦊🦊🦊🦊🦊🦊")
+
+
+
+
+
+app.listen(3001, () => {
+    console.log("Hunting cobras on 3001 🦊🦊🦊🦊🦊🦊🦊")
 })
